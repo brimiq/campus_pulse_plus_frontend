@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Soft-UI Neumorphic Styles */
+.post-card {
+  @apply bg-gray-100 rounded-3xl p-6 shadow-inner;
+  box-shadow: 8px 8px 16px #d1d5db, -8px -8px 16px #ffffff;
+}
+
+.category-badge {
+  @apply bg-blue-200 text-blue-800 px-3 py-1 rounded-full text-sm font-medium;
+  box-shadow: inset 3px 3px 6px #c7d2fe, inset -3px -3px 6px #ffffff;
+}
+
+.post-meta {
+  @apply text-gray-500 text-sm;
+}
+
+.feed-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+}
