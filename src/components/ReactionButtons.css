@@ -1,0 +1,60 @@
+.reaction-buttons {
+  display: flex;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.reaction-btn {
+  padding: 0.5rem 1rem;
+  border: 2px solid #ddd;
+  background-color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.reaction-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.reaction-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.like-btn {
+  border-color: #3498db;
+  color: #3498db;
+}
+
+.like-btn:hover:not(:disabled) {
+  background-color: #3498db;
+  color: white;
+}
+
+.like-btn.active {
+  background-color: #3498db;
+  color: white;
+  border-color: #3498db;
+}
+
+.dislike-btn {
+  border-color: #e74c3c;
+  color: #e74c3c;
+}
+
+.dislike-btn:hover:not(:disabled) {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.dislike-btn.active {
+  background-color: #e74c3c;
+  color: white;
+  border-color: #e74c3c;
+}

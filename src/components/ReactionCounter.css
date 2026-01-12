@@ -1,0 +1,32 @@
+.reaction-counter {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  font-size: 1rem;
+}
+
+.reaction-count {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  background-color: #f8f9fa;
+}
+
+.like-count {
+  color: #3498db;
+}
+
+.dislike-count {
+  color: #e74c3c;
+}
+
+.reaction-count .emoji {
+  font-size: 1.25rem;
+}
+
+.reaction-count .count {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
