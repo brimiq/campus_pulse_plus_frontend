@@ -1,62 +1,38 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useState } from 'react';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import HomePage from './pages/HomePage';
-import CreatePostPage from './pages/CreatePostPage';
-import PostDetailPage from './pages/PostDetailPage';
-import AdminLoginPage from './pages/AdminLoginPage';
-import AdminDashboardPage from './pages/AdminDashboardPage';
-import AnalyticsPage from './pages/AnalyticsPage';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { useState } from "react";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import HomeFeed from "./pages/HomeFeed";
+import Posts from "./pages/Posts";
+import CreatePost from "./pages/CreatePost";
+// import PostDetail from './pages/PostDetail'; // Post details not implemented yet
+// import Login from './pages/Login'; // Admin authentication handled by another team member
+// import AdminDashboard from './pages/AdminDashboard'; // Admin authentication handled by another team member
+// import AalyticsDashboard from './pages/AalyticsDashboard'; // Analytics handled by another team member
 
 function App() {
-  // Mock user state - replace with real auth later
-  const [currentUser, setCurrentUser] = useState({
-    id: 1,
-    role: 'student' // or 'admin'
-  });
-
-  // Check if user is admin
-  const isAdmin = currentUser && currentUser.role === 'admin';
-
-  // Protected Route Component
-  const ProtectedRoute = ({ children }) => {
-    if (!isAdmin) {
-      return <Navigate to="/admin/login" replace />;
-    }
-    return children;
-  };
-
   return (
     <Router>
-      <div className="app-container">
-        <Navbar currentUser={currentUser} />
-        
-        <main className="main-content">
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+
+        <main className="flex-1">
           <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<HomePage currentUser={currentUser} />} />
-            <Route path="/posts/new" element={<CreatePostPage currentUser={currentUser} />} />
-            <Route path="/posts/:id" element={<PostDetailPage currentUser={currentUser} />} />
-            <Route path="/admin/login" element={<AdminLoginPage setCurrentUser={setCurrentUser} />} />
-            
-            {/* Protected Admin Routes */}
-            <Route 
-              path="/admin/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <AdminDashboardPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/analytics" 
-              element={
-                <ProtectedRoute>
-                  <AnalyticsPage />
-                </ProtectedRoute>
-              } 
-            />
+            {/* Your main routes - Home Feed and Create Post */}
+            <Route path="/" element={<HomeFeed />} />
+            <Route path="/posts" element={<Posts />} />
+            <Route path="/posts/new" element={<CreatePost />} />
+
+            {/* Other routes commented out - handled by other team members */}
+            {/* <Route path="/posts/:id" element={<PostDetail />} /> */}
+            {/* <Route path="/admin/login" element={<Login />} /> */}
+            {/* <Route path="/admin/dashboard" element={<AdminDashboard />} /> */}
+            {/* <Route path="/analytics" element={<AalyticsDashboard />} /> */}
 
             {/* Catch all - redirect to home */}
             <Route path="*" element={<Navigate to="/" replace />} />
@@ -68,5 +44,4 @@ function App() {
     </Router>
   );
 }
-
 export default App;
