@@ -1,55 +1,71 @@
-import { useState, useEffect } from 'react';
-import './CategoryFilter.css';
+import { useState, useEffect } from "react";
 
 function CategoryFilter({ onCategoryChange, selectedCategory }) {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Mock categories - will fetch from backend later
+    // Mock categories (replace with backend later)
     const mockCategories = [
-      { id: 1, name: 'All Topics' },
-      { id: 2, name: 'Tech Issues' },
-      { id: 3, name: 'Facilities' },
-      { id: 4, name: 'Safety' },
-      { id: 5, name: 'Dining' },
-      { id: 6, name: 'Housing' }
+      { id: 1, name: "All Topics" },
+      { id: 2, name: "Tech Issues" },
+      { id: 3, name: "Facilities" },
+      { id: 4, name: "Safety" },
+      { id: 5, name: "Dining" },
+      { id: 6, name: "Housing" },
     ];
 
     setTimeout(() => {
       setCategories(mockCategories);
       setLoading(false);
     }, 300);
-
-    // Real implementation will be:
-    // fetch('/api/categories')
-    //   .then(res => res.json())
-    //   .then(data => setCategories([{ id: 0, name: 'All Topics' }, ...data]))
-    //   .finally(() => setLoading(false));
   }, []);
 
   const handleChange = (e) => {
     const value = e.target.value;
-    onCategoryChange(value === 'all' ? null : value);
+    onCategoryChange(value === "all" ? null : value);
   };
 
   if (loading) {
-    return <div className="category-filter-loading">Loading categories...</div>;
+    return (
+      <div className="text-sm text-zinc-500">
+        Loading categories…
+      </div>
+    );
   }
 
   return (
-    <div className="category-filter">
-      <label htmlFor="category-select" className="filter-label">
-        Filter by Topic:
+    <div className="flex items-center gap-3">
+      <label
+        htmlFor="category-select"
+        className="text-sm font-medium text-zinc-700"
+      >
+        Filter by topic:
       </label>
+
       <select
         id="category-select"
-        className="category-select"
-        value={selectedCategory || 'all'}
+        value={selectedCategory || "all"}
         onChange={handleChange}
+        className="
+          rounded-lg
+          border
+          border-zinc-300
+          bg-white
+          px-3
+          py-2
+          text-sm
+          text-zinc-800
+          shadow-sm
+          focus:border-indigo-500
+          focus:outline-none
+          focus:ring-2
+          focus:ring-indigo-500
+        "
       >
         <option value="all">All Topics</option>
-        {categories.slice(1).map(category => (
+
+        {categories.slice(1).map((category) => (
           <option key={category.id} value={category.name}>
             {category.name}
           </option>
