@@ -1,20 +1,7 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate, Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
-import {
-  MessageSquare,
-  Image as ImageIcon,
-  ArrowLeft,
-  Sparkles,
-  Shield,
-  Users,
-  Upload,
-  RefreshCw,
-  Camera,
-  X,
-} from "lucide-react";
 
 const CreatePost = () => {
   const {
@@ -25,100 +12,38 @@ const CreatePost = () => {
   } = useForm();
   const navigate = useNavigate();
   const content = watch("content", "");
-  const maxLength = 500;
+  const maxLength = 150;
   const [imageUrl, setImageUrl] = useState("");
-  const [imageMode, setImageMode] = useState("none"); // "none", "generate", "upload"
-  const [uploadedFile, setUploadedFile] = useState(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const fileInputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
 
-  // Campus-related keywords for smart image generation
-  const campusKeywords = {
-    cafeteria: ["cafeteria", "food", "dining", "lunch", "meal", "restaurant"],
-    library: ["library", "books", "study", "reading", "quiet"],
-    dorm: ["dorm", "residence", "hall", "room", "bedroom", "apartment"],
-    classroom: ["classroom", "lecture", "professor", "teaching", "education"],
-    sports: ["sports", "gym", "fitness", "basketball", "football", "track"],
-    parking: ["parking", "car", "vehicle", "lot", "drive"],
-    wifi: ["wifi", "internet", "network", "connection", "online"],
-    security: ["security", "guard", "safe", "protection", "gate"],
-    maintenance: ["maintenance", "repair", "fix", "broken", "facility"],
-    event: ["event", "club", "activity", "party", "gathering"],
-  };
-
-  const generateSmartImage = (text) => {
-    const lowerText = text.toLowerCase();
-    let matchedKeyword = "university"; // default
-
-    // Find matching campus keywords
-    for (const [category, keywords] of Object.entries(campusKeywords)) {
-      if (keywords.some(keyword => lowerText.includes(keyword))) {
-        matchedKeyword = category;
-        break;
-      }
-    }
-
-    // Generate Unsplash URL with campus context
-    const randomId = Math.floor(Math.random() * 1000) + 1;
-    return `https://images.unsplash.com/photo-1565688534245-05d6b5be184a?q=80&w=600&auto=format&fit=crop&random=${randomId}`;
-  };
-
-  const handleGenerateImage = async () => {
-    if (!content.trim()) {
-      toast.error("Please write some content first to generate a relevant image");
-      return;
-    }
-
-    setIsGenerating(true);
-    setImageMode("generate");
-
-    // Simulate API call delay for better UX
-    setTimeout(() => {
-      const smartImageUrl = generateSmartImage(content);
-      setImageUrl(smartImageUrl);
-      setUploadedFile(null);
-      setIsGenerating(false);
-      toast.success("Smart image generated based on your post!");
-    }, 1000);
-  };
-
-  const handleFileUpload = (event) => {
+  const handleImageUpload = async (event) => {
     const file = event.target.files[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        toast.error("File size must be less than 5MB");
-        return;
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
+
+    try {
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+      const data = await response.json();
+      if (data.secure_url) {
+        setImageUrl(data.secure_url);
+        toast.success("Image uploaded successfully!");
+      } else {
+        toast.error("Failed to upload image");
       }
-
-      if (!file.type.startsWith('image/')) {
-        toast.error("Please select an image file");
-        return;
-      }
-
-      setUploadedFile(file);
-      setImageUrl(URL.createObjectURL(file));
-      setImageMode("upload");
-      toast.success("Image uploaded successfully!");
-    }
-  };
-
-  const handleRemoveImage = () => {
-    setImageUrl("");
-    setImageMode("none");
-    setUploadedFile(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  const handleImageModeChange = (mode) => {
-    if (mode === "none") {
-      handleRemoveImage();
-    } else if (mode === "upload") {
-      setImageMode("upload");
-      fileInputRef.current?.click();
-    } else if (mode === "generate") {
-      handleGenerateImage();
+    } catch (error) {
+      toast.error("Image upload failed");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -129,30 +54,6 @@ const CreatePost = () => {
     }
 
     try {
-      let finalImageUrl = null;
-
-      // Handle uploaded file
-      if (uploadedFile) {
-        const formData = new FormData();
-        formData.append("file", uploadedFile);
-
-        const uploadResponse = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
-          method: "POST",
-          body: formData,
-        });
-
-        if (uploadResponse.ok) {
-          const uploadData = await uploadResponse.json();
-          finalImageUrl = uploadData.url;
-        } else {
-          toast.error("Failed to upload image");
-          return;
-        }
-      } else if (imageUrl && imageMode === "generate") {
-        // Use generated image URL directly
-        finalImageUrl = imageUrl;
-      }
-
       const response = await fetch(`${import.meta.env.VITE_API_URL}/posts`, {
         method: "POST",
         headers: {
@@ -160,15 +61,15 @@ const CreatePost = () => {
         },
         body: JSON.stringify({
           content: data.content,
-          image: finalImageUrl,
-          user_id: 1,
-          category_id: 1,
+          image: imageUrl,
+          user_id: 1, // Assuming logged-in user ID
+          category_id: parseInt(data.category_id),
         }),
       });
 
       if (response.ok) {
         toast.success("Post created successfully!");
-        navigate("/");
+        navigate("/home");
       } else {
         const errorData = await response.json();
         toast.error(errorData.error || "Failed to create post");
@@ -179,233 +80,75 @@ const CreatePost = () => {
   };
 
   return (
-    <div className="create-post-page">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
       <Toaster />
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="create-post-form w-full max-w-md"
+      >
+        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+          Create New Post
+        </h2>
 
-      {/* Hero Section */}
-      <section className="create-hero-section">
-        <div className="create-hero-background">
-          <img
-            src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop"
-            alt="Create Post"
-            className="create-hero-background"
-            loading="eager"
+        <div className="mb-4">
+          <textarea
+            {...register("content", { required: true, maxLength })}
+            className="post-textarea"
+            rows="4"
+            placeholder="What's on your mind?"
           />
+          <div className="text-right text-sm text-gray-500 mt-1">
+            {content.length}/{maxLength}
+          </div>
+          {errors.content && (
+            <p className="text-red-500 text-sm mt-1">
+              Content is required and must be under 150 characters
+            </p>
+          )}
         </div>
-        <div className="create-hero-gradient"></div>
-        <div className="create-hero-noise"></div>
 
-        <div className="create-hero-content">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="create-hero-header"
-          >
-            <Link
-              to="/"
-              className="create-back-button"
-            >
-              <ArrowLeft size={20} />
-              Back to Feed
-            </Link>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-              className="create-hero-title"
-            >
-              Share Your Voice
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.6 }}
-              className="create-hero-subtitle"
-            >
-              Express your thoughts, share experiences, and connect with your campus community
-            </motion.p>
-          </motion.div>
+        <div className="mb-6">
+          <input
+            {...register("category_id", { required: true })}
+            type="number"
+            className="w-full p-3 bg-gray-50/50 rounded-2xl border-none focus:outline-none focus:ring-2 focus:ring-blue-300"
+            placeholder="Category ID"
+          />
+          {errors.category_id && (
+            <p className="text-red-500 text-sm mt-1">Category ID is required</p>
+          )}
         </div>
-      </section>
 
-      {/* Form Section */}
-      <section className="create-form-section">
-        <div className="container">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.6 }}
-            className="create-form-container"
-          >
-            <div className="create-form-header">
-              <div className="create-form-icon">
-                <MessageSquare size={28} />
-              </div>
-              <h2>Create New Post</h2>
-              <p>Share what's on your mind with the community</p>
+        <div className="mb-6">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="w-full p-3 bg-gray-50/50 rounded-2xl border-none focus:outline-none focus:ring-2 focus:ring-blue-300"
+          />
+          {uploading && <p className="text-blue-500 text-sm mt-1">Uploading image...</p>}
+          {imageUrl && (
+            <div className="mt-4">
+              <img
+                src={imageUrl}
+                alt="Preview"
+                className="w-full h-48 object-cover rounded-2xl shadow-inner"
+                style={{
+                  boxShadow: "inset 4px 4px 8px rgba(0, 0, 0, 0.1), inset -4px -4px 8px rgba(255, 255, 255, 0.8)",
+                }}
+              />
             </div>
-
-            <form onSubmit={handleSubmit(onSubmit)} className="create-form">
-              <div className="create-form-group">
-                <label className="create-form-label">
-                  <MessageSquare size={18} />
-                  Your Message
-                </label>
-                <textarea
-                  {...register("content", {
-                    required: "Content is required",
-                    maxLength: {
-                      value: maxLength,
-                      message: `Content must be under ${maxLength} characters`
-                    }
-                  })}
-                  className="create-form-textarea"
-                  rows="6"
-                  placeholder="What's happening on campus? Share your thoughts, experiences, or suggestions..."
-                />
-                <div className="create-form-footer">
-                  <div className="create-character-count">
-                    {content.length}/{maxLength}
-                  </div>
-                  {errors.content && (
-                    <p className="create-form-error">{errors.content.message}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="create-form-group">
-                <label className="create-form-label">
-                  <ImageIcon size={18} />
-                  Image (Optional)
-                </label>
-
-                {/* Image Mode Selection */}
-                <div className="create-image-options">
-                  <button
-                    type="button"
-                    onClick={() => handleImageModeChange("generate")}
-                    className={`create-image-option ${imageMode === "generate" ? "active" : ""}`}
-                    disabled={isGenerating}
-                  >
-                    <Sparkles size={16} />
-                    {isGenerating ? "Generating..." : "Generate Smart Image"}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleImageModeChange("upload")}
-                    className={`create-image-option ${imageMode === "upload" ? "active" : ""}`}
-                  >
-                    <Upload size={16} />
-                    Upload Image
-                  </button>
-
-                  {imageUrl && (
-                    <button
-                      type="button"
-                      onClick={() => handleImageModeChange("none")}
-                      className="create-image-option remove"
-                    >
-                      <X size={16} />
-                      Remove Image
-                    </button>
-                  )}
-                </div>
-
-                {/* Hidden file input */}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                  style={{ display: "none" }}
-                />
-
-                {/* Image Preview */}
-                {imageUrl && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="create-image-preview"
-                  >
-                    <div className="create-preview-header">
-                      <div className="create-preview-badge">
-                        {imageMode === "generate" ? (
-                          <>
-                            <Sparkles size={14} />
-                            Smart Generated
-                          </>
-                        ) : (
-                          <>
-                            <Camera size={14} />
-                            Uploaded
-                          </>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleRemoveImage}
-                        className="create-preview-remove"
-                      >
-                        <X size={16} />
-                      </button>
-                    </div>
-                    <img
-                      src={imageUrl}
-                      alt="Post preview"
-                      className="create-preview-image"
-                    />
-                  </motion.div>
-                )}
-
-                {/* Smart Generation Hint */}
-                {imageMode === "generate" && !imageUrl && content.trim() && (
-                  <div className="create-smart-hint">
-                    <Sparkles size={14} />
-                    <span>Image will be generated based on keywords in your post (e.g., "cafeteria" → campus cafeteria image)</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="create-form-actions">
-                <Link to="/" className="create-cancel-btn">
-                  Cancel
-                </Link>
-                <button type="submit" className="create-submit-btn">
-                  <MessageSquare size={18} />
-                  Post to Community
-                </button>
-              </div>
-            </form>
-          </motion.div>
-
-          {/* Trust Indicators */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.6 }}
-            className="create-trust-section"
-          >
-            <div className="create-trust-item">
-              <Shield className="create-trust-icon" />
-              <div>
-                <h4>Anonymous & Secure</h4>
-                <p>Your privacy is protected</p>
-              </div>
-            </div>
-            <div className="create-trust-item">
-              <Users className="create-trust-icon" />
-              <div>
-                <h4>Community Impact</h4>
-                <p>Your voice drives change</p>
-              </div>
-            </div>
-          </motion.div>
+          )}
         </div>
-      </section>
+
+        <button
+          type="submit"
+          disabled={uploading}
+          className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white font-bold py-3 px-4 rounded-2xl transition duration-300"
+        >
+          {uploading ? "Uploading..." : "Post"}
+        </button>
+      </form>
     </div>
   );
 };
