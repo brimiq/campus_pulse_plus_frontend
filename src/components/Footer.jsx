@@ -1,34 +1,41 @@
-import './Footer.css';
+import { Link } from 'react-router-dom';
 
 function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="footer">
-      <div className="footer-container">
-        <div className="footer-content">
-          <div className="footer-section">
-            <h3>Campus Pulse+</h3>
-            <p>Empowering students to voice campus issues anonymously</p>
+    <footer className="bg-gray-800 text-white py-8 mt-auto">
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div>
+            <h3 className="text-xl font-bold mb-4">Campus Pulse+</h3>
+            <p className="text-gray-300">Empowering students to voice campus issues anonymously</p>
           </div>
 
-          <div className="footer-section">
-            <h4>Quick Links</h4>
-            <ul>
-              <li><a href="/">Home</a></li>
-              <li><a href="/posts/new">Create Post</a></li>
-              <li><a href="/admin/login">Admin Login</a></li>
+          <div>
+            <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link to="/" className="text-gray-300 hover:text-white transition-colors">
+                  Home Feed
+                </Link>
+              </li>
+              <li>
+                <Link to="/posts/new" className="text-gray-300 hover:text-white transition-colors">
+                  Create Post
+                </Link>
+              </li>
             </ul>
           </div>
 
-          <div className="footer-section">
-            <h4>About</h4>
-            <p>A platform for students to share and vote on campus issues.</p>
+          <div>
+            <h4 className="text-lg font-semibold mb-4">About</h4>
+            <p className="text-gray-300">A platform for students to share and vote on campus issues.</p>
           </div>
         </div>
 
-        <div className="footer-bottom">
-          <p>&copy; {currentYear} Campus Pulse+. All rights reserved.</p>
+        <div className="border-t border-gray-700 mt-8 pt-8 text-center">
+          <p className="text-gray-400">&copy; {currentYear} Campus Pulse+. All rights reserved.</p>
         </div>
       </div>
     </footer>
