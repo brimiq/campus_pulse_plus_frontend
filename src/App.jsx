@@ -16,17 +16,23 @@ import CreatePost from "./pages/CreatePost";
 // import AalyticsDashboard from './pages/AalyticsDashboard'; // Analytics handled by another team member
 
 function App() {
+  // Add mock user state for your Navbar and Reaction components
+  const [currentUser] = useState({
+    id: 1,
+    role: 'student' // Change to 'admin' to test admin features
+  });
+
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <Navbar currentUser={currentUser} />
 
         <main className="flex-1">
           <Routes>
             {/* Your main routes - Home Feed and Create Post */}
-            <Route path="/" element={<HomeFeed />} />
-            <Route path="/posts" element={<Posts />} />
-            <Route path="/posts/new" element={<CreatePost />} />
+            <Route path="/" element={<HomeFeed currentUser={currentUser} />} />
+            <Route path="/posts" element={<Posts currentUser={currentUser} />} />
+            <Route path="/posts/new" element={<CreatePost currentUser={currentUser} />} />
 
             {/* Other routes commented out - handled by other team members */}
             {/* <Route path="/posts/:id" element={<PostDetail />} /> */}

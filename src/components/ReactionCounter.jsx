@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import './ReactionCounter.css';
 
 function ReactionCounter({ postId, initialLikes = 0, initialDislikes = 0 }) {
   const [likes, setLikes] = useState(initialLikes);
@@ -10,7 +9,7 @@ function ReactionCounter({ postId, initialLikes = 0, initialDislikes = 0 }) {
     const fetchReactionCounts = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`http://localhost:5000/api/reactions/post/${postId}/counts`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/reactions/post/${postId}/counts`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch reaction counts');
@@ -21,7 +20,6 @@ function ReactionCounter({ postId, initialLikes = 0, initialDislikes = 0 }) {
         setDislikes(data.dislikes);
       } catch (error) {
         console.error('Error fetching reaction counts:', error);
-        // Keep initial values on error
       } finally {
         setLoading(false);
       }
@@ -34,25 +32,25 @@ function ReactionCounter({ postId, initialLikes = 0, initialDislikes = 0 }) {
 
   if (loading) {
     return (
-      <div className="reaction-counter">
-        <div className="reaction-count">
-          <span className="emoji">⏳</span>
-          <span className="count">...</span>
+      <div className="flex gap-4">
+        <div className="flex items-center gap-2">
+          <span className="text-xl">⏳</span>
+          <span className="text-sm font-medium text-gray-500">...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="reaction-counter">
-      <div className="reaction-count like-count">
-        <span className="emoji">👍</span>
-        <span className="count">{likes}</span>
+    <div className="flex gap-6">
+      <div className="flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full">
+        <span className="text-lg">👍</span>
+        <span className="text-sm font-bold text-blue-600">{likes}</span>
       </div>
 
-      <div className="reaction-count dislike-count">
-        <span className="emoji">👎</span>
-        <span className="count">{dislikes}</span>
+      <div className="flex items-center gap-2 bg-red-50 px-3 py-1 rounded-full">
+        <span className="text-lg">👎</span>
+        <span className="text-sm font-bold text-red-600">{dislikes}</span>
       </div>
     </div>
   );
