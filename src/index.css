@@ -2,31 +2,3 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Soft-UI Neumorphic Styles */
-.post-card {
-  @apply bg-gray-100 rounded-3xl p-6 shadow-inner;
-  box-shadow: 8px 8px 16px #d1d5db, -8px -8px 16px #ffffff;
-}
-
-.category-badge {
-  @apply bg-blue-200 text-blue-800 px-3 py-1 rounded-full text-sm font-medium;
-  box-shadow: inset 3px 3px 6px #c7d2fe, inset -3px -3px 6px #ffffff;
-}
-
-.post-meta {
-  @apply text-gray-500 text-sm;
-}
-
-.feed-grid {
-  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
-}
-
-.create-post-form {
-  @apply bg-white/20 backdrop-blur-md rounded-3xl p-6 shadow-lg;
-  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.1), 0 8px 32px rgba(0, 0, 0, 0.1);
-}
-
-.post-textarea {
-  @apply w-full p-4 bg-gray-50/50 rounded-2xl border-none resize-none focus:outline-none focus:ring-2 focus:ring-blue-300;
-  box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.1), inset -4px -4px 8px rgba(255, 255, 255, 0.8);
-}
